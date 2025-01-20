@@ -37,7 +37,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Page<Employee> employees = employeeRepository.findAll(pageable);
         return employees.map(EmployeeMapper::toDTO);
     }
-
+    @Transactional
     @Override
     public Employee assignItemToOrderList(Long employeeId, Long roleId) {
         Set<Role> roles = null;
@@ -48,9 +48,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setRoles(roles);
         return employeeRepository.save(employee);
     }
-
-
-
 
     @Override
     public EmployeeDTO getEmployeeById(Long employeeId) {
@@ -78,7 +75,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new CustomNotFoundException(employeeId));
         employeeRepository.deleteById(employee.getId());
     }
-
+    
+    @Transactional
     @Override
     public Employee unassignRoleFromEmployee(Long roleId, Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
