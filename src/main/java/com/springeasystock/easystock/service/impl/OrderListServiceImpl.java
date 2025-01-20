@@ -42,7 +42,8 @@ public class OrderListServiceImpl implements OrderListService {
         Page<OrderList> orderLists = orderListRepository.findAll(pageable);
         return orderLists.map(OrderListMapper::toDTO);
     }
-
+    
+    @Transactional
     @Override
     public OrderList assignItemToOrderList(Long orderListId, Long itemId) {
         Set<Item> itemSet = null;
@@ -53,6 +54,8 @@ public class OrderListServiceImpl implements OrderListService {
         orderList.setItemIds(itemSet);
         return orderListRepository.save(orderList);
     }
+    
+    @Transactional
     @Override
     public OrderList unassignItemFromOrderList(Long orderListId, Long itemId) {
         OrderList orderList = orderListRepository.findById(orderListId)
