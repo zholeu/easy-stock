@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: easystock
+
+    ports:
+      - "127.0.0.1:5451:5432"
+
+    networks:
+      - my_network
+
+
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/easystock
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: user
+    ports:
+      - "8080:8080"
+
+    networks:
+      - my_network
+
+networks:
+    my_network:
+      driver: bridge
