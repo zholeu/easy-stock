@@ -5,16 +5,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.EnabledIf;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
-
-
 import com.springeasystock.easystock.service.impl.CustomerServiceImpl;
 import com.springeasystock.easystock.record.CustomerDTO;
-
-import java.util.NoSuchElementException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -77,17 +74,25 @@ public class CustomerServiceIntegrationTest {
 
     @Test
     public void testUpdateCustomer() {
-
         CustomerDTO customerDTO = new CustomerDTO(1L,"Alice", "Johnson", "alice.johnson@example.com", "101 Maple St");
         CustomerDTO createdCustomer = customerService.createCustomer(customerDTO);
-
         CustomerDTO updatedCustomer = new CustomerDTO(1L,"Alice", "Smith", "alice.smith@example.com", "101 Maple St");
-
         CustomerDTO updatedCustomerResult = customerService.updateCustomer(createdCustomer.id(), updatedCustomer);
         assertNotNull(updatedCustomerResult);
         assertEquals(updatedCustomer.name(), updatedCustomerResult.name());
         assertEquals(updatedCustomer.surname(), updatedCustomerResult.surname());
         assertEquals(updatedCustomer.email(), updatedCustomerResult.email());
+    }
+
+    @Test
+    public void testGetAllCustomers() {
+        CustomerDTO customer1 = new CustomerDTO(1L, "John", "Doe", "john.doe@example.com", "123 Main St");
+        CustomerDTO customer2 = new CustomerDTO(2L, "Jane", "Smith", "jane.smith@example.com", "456 Elm St");
+        customerService.createCustomer(customer1);
+        customerService.createCustomer(customer2);
+        Pageable pageable = PageRequest.of(0, 10); // First page with 10 items
+        Page<CustomerDTO> customerPage = customerService.getAllCustomers(pageable);
+        assertNotNull(customerPage);
     }
 }
 
