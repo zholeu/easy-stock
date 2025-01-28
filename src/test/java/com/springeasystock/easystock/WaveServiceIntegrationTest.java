@@ -1,10 +1,16 @@
 package com.springeasystock.easystock;
 import com.springeasystock.easystock.model.OrderList;
 import com.springeasystock.easystock.model.Wave;
+import com.springeasystock.easystock.record.RoleDTO;
 import com.springeasystock.easystock.record.WaveDTO;
+import com.springeasystock.easystock.repo.RoleRepository;
+import com.springeasystock.easystock.repo.WaveRepository;
 import com.springeasystock.easystock.service.OrderListService;
 import com.springeasystock.easystock.service.impl.WaveServiceImpl;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 import com.springeasystock.easystock.exception.CustomNotFoundException;
@@ -24,10 +30,8 @@ public class WaveServiceIntegrationTest {
 
     @Autowired
     private WaveServiceImpl waveService;
-
     @Autowired
-    private OrderListService orderListService;
-
+    private WaveRepository waveRepository;
     @BeforeAll
     public static void setUp() {
         postgresContainer.start();
@@ -84,7 +88,6 @@ public class WaveServiceIntegrationTest {
         waveService.deleteWave(createdWave.id());
         assertThrows(CustomNotFoundException.class, () -> waveService.getWaveById(createdWave.id()));
     }
-
     @Test
     public void testUpdateRole() {
         WaveDTO waveDTO = new WaveDTO(2L, null, "1", "READY");
@@ -94,6 +97,24 @@ public class WaveServiceIntegrationTest {
         assertNotNull(updatedWaveResult);
         assertEquals(updatedWave.waveStatus(), updatedWaveResult.waveStatus());
         assertEquals(updatedWave.wavePriority(), updatedWaveResult.wavePriority());
+    }
+    @Test
+    public void testGetAllWaves() {
+        WaveDTO waveDTO = new WaveDTO(1L, null, "1", "READY");
+        WaveDTO waveDTO2 = new WaveDTO(2L, null, "1", "READY");
+        waveService.createWave(waveDTO);
+        waveService.createWave(waveDTO2);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<WaveDTO> waveDTOS = waveService.getAllWaves(pageable);
+        assertNotNull(waveDTOS);
+    }
+    @Test
+    public void testExistsById() {
+        Wave wave = new Wave();
+        wave.setWaveStatus("READY");
+        waveRepository.save(wave);
+        assertTrue(waveService.existsById(wave.getId()));
+        assertFalse(waveService.existsById(999L));
     }
 }
 
